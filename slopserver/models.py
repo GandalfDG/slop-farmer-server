@@ -23,3 +23,11 @@ class Path(SQLModel, table=True):
     
     domain_id: int = Field(foreign_key="domain.id")
     domain: Domain = Relationship(back_populates="paths")
+
+class User(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    email: str = Field(index=True, unique=True)
+    password_hash: str
+    salt: str
+
+    email_verified: bool = Field(default=False)
