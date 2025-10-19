@@ -29,7 +29,7 @@ class Path(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     path: str
     
-    domain_id: int = Field(foreign_key="domain.id")
+    domain_id: int | None = Field(foreign_key="domain.id")
     domain: Domain = Relationship(back_populates="paths")
 
 class User(SQLModel, table=True):
