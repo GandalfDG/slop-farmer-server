@@ -1,4 +1,8 @@
+from typing import Annotated
 from sqlmodel import Field, SQLModel, create_engine, Relationship
+from pydantic import AfterValidator, BaseModel
+
+from urllib.parse import urlparse, ParseResult
 
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
@@ -10,6 +14,10 @@ NAMING_CONVENTION = {
 
 metadata = SQLModel.metadata
 metadata.naming_convention = NAMING_CONVENTION
+
+################################################
+#           Database Models
+################################################
 
 class Domain(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -31,3 +39,24 @@ class User(SQLModel, table=True):
     salt: str
 
     email_verified: bool = Field(default=False)
+
+################################################
+#           API Models
+################################################
+
+def url_validator(urls: list[str]) -> list[ParseResult]:
+    parsed_urls = list()
+    for url in urls:
+        try:
+            parsed = urlparse(url)
+            if not parsed.netloc:
+                raise ValueError(f"couldn't parse domain from '{url}'")
+            parsed_urls.append(parsed)
+        except ValueError as e:
+            raise ValueError(f"couldn't parse '{url}' as a URL")
+    return parsed_urls
+
+
+class SlopReport(BaseModel):
+    """Accept reports of one or more slop page URLs"""
+    slop_urls: Annotated[list[str], AfterValidator(url_validator)]
