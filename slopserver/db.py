@@ -44,3 +44,10 @@ def insert_slop(urls: list[ParseResult], engine: Engine):
                         existing_domain.paths.append(Path(path=path))
 
         session.commit()
+
+def get_user(email, engine):
+    query = select(User).where(User.email == email)
+
+    with Session(engine) as session:
+        user = session.scalar(query)
+        return user
