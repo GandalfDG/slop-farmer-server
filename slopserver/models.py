@@ -1,8 +1,12 @@
 from typing import Annotated
 from sqlmodel import Field, SQLModel, create_engine, Relationship
-from pydantic import AfterValidator, BaseModel
+from pydantic import AfterValidator, BaseModel, EmailStr, Json
+
+from altcha import Payload as AltchaPayload, verify_solution
 
 from urllib.parse import urlparse, ParseResult
+
+from slopserver.common import TEMP_HMAC_KEY
 
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
@@ -36,7 +40,6 @@ class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     email: str = Field(index=True, unique=True)
     password_hash: str
-    salt: str
 
     email_verified: bool = Field(default=False)
 
@@ -56,7 +59,17 @@ def url_validator(urls: list[str]) -> list[ParseResult]:
             raise ValueError(f"couldn't parse '{url}' as a URL")
     return parsed_urls
 
+def altcha_validator(altcha_response: AltchaPayload):
+    verified = verify_solution(altcha_response, TEMP_HMAC_KEY)
+    if not verified[0]:
+        raise ValueError(f"altcha verification failed: {verified[1]}")
+    return None
 
 class SlopReport(BaseModel):
     """Accept reports of one or more slop page URLs"""
     slop_urls: Annotated[list[str], AfterValidator(url_validator)]
+
+class SignupForm(BaseModel):
+    email: EmailStr
+    password: str
+    altcha_response: Annotated[Json, AfterValidator(altcha_validator)]

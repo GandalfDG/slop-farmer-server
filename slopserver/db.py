@@ -51,3 +51,10 @@ def get_user(email, engine):
     with Session(engine) as session:
         user = session.scalar(query)
         return user
+
+def create_user(email, password_hash, engine):
+    user = User(email=email, password_hash=password_hash, email_verified=False)
+
+    with Session(engine) as session:
+        session.add(user)
+        session.commit()
