@@ -12,8 +12,9 @@ from datetime import datetime, timedelta
 
 import uvicorn
 
-from fastapi import Depends, FastAPI, Form, HTTPException
+from fastapi import Body, Depends, FastAPI, Form, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 
 from sqlalchemy import create_engine
 
@@ -35,6 +36,14 @@ TEMP_SECRET = "5bcc778a96b090c3ac1d587bb694a060eaf7bdb5832365f91d5078faf1fff210"
 ALGO = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+TEMP_ORIGINS = [
+    "*"
+]
+
+app.add_middleware(CORSMiddleware, allow_origins=TEMP_ORIGINS,
+                   allow_credentials=True,
+                   allow_methods=["*"],
+                   allow_headers=["*"],)
 
 password_hash = PasswordHash.recommended()
 
@@ -59,7 +68,7 @@ async def report_slop(report: SlopReport):
     insert_slop(report.slop_urls, TEMP_ENGINE)
 
 @app.post("/check")
-async def check_slop(check: SlopReport):
+async def check_slop(check: Annotated[SlopReport, Body()]):
     slop_results = select_slop(check.slop_urls, TEMP_ENGINE)
     return slop_results
 
