@@ -96,8 +96,10 @@ def generate_auth_token(username):
     return encoded_jwt
 
 def verify_auth_token(token: str):
-    token = jwt.decode(token, TOKEN_SECRET, ALGO, verify=True)
-
+    try:
+        token = jwt.decode(token, TOKEN_SECRET, ALGO, audience="slopserver")
+    except:
+        raise HTTPException(status_code=401, detail="invalid access token")
 
 @app.post("/report")
 async def report_slop(report: SlopReport, bearer: Annotated[str, AfterValidator(verify_auth_token), Header()]):
@@ -142,7 +144,7 @@ async def altcha_challenge():
 async def simple_login(username: Annotated[str, Form()], password: Annotated[str, Form()]):
     user = auth_user(username, password, DB_ENGINE)
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
     token = generate_auth_token(username)
     return {"access_token": token, "token_type": "bearer"}
 
