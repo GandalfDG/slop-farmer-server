@@ -40,7 +40,7 @@ app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 class ServerSettings(BaseSettings):
-    db_url: str = "postgresql+psycopg://slop-farmer@192.168.1.163/slop-farmer"
+    db_url: str = "postgresql+psycopg2://slop-farmer@192.168.1.163/slop-farmer"
     token_secret: str = "5bcc778a96b090c3ac1d587bb694a060eaf7bdb5832365f91d5078faf1fff210"
     # altcha_secret: str
 
