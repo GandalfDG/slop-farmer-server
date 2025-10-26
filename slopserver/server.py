@@ -95,15 +95,21 @@ def generate_auth_token(username):
     encoded_jwt = jwt.encode(bearer_token, TOKEN_SECRET, ALGO)   
     return encoded_jwt
 
+def get_token_user(decoded_token):
+    user = get_user(decoded_token["sub"], DB_ENGINE)
+    return user
+
 def verify_auth_token(token: str):
     try:
         token = jwt.decode(token, TOKEN_SECRET, ALGO, audience="slopserver")
+        return token
     except:
         raise HTTPException(status_code=401, detail="invalid access token")
 
 @app.post("/report")
 async def report_slop(report: SlopReport, bearer: Annotated[str, AfterValidator(verify_auth_token), Header()]):
-    insert_slop(report.slop_urls, DB_ENGINE)
+    user = get_token_user(bearer)
+    insert_slop(report.slop_urls, DB_ENGINE, user)
 
 @app.post("/check")
 async def check_slop(check: Annotated[SlopReport, Body()], bearer: Annotated[str, AfterValidator(verify_auth_token), Header()]):
