@@ -43,6 +43,10 @@ class User(SQLModel, table=True):
 
     email_verified: bool = Field(default=False)
 
+class Report(SQLModel, table=True):
+    path_id: int | None = Field(default=None, primary_key=True, foreign_key="path.id")
+    user_id: int | None = Field(default=None, primary_key=True, foreign_key="user.id")
+
 ################################################
 #           API Models
 ################################################
