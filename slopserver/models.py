@@ -2,6 +2,8 @@ from typing import Annotated
 from sqlmodel import Field, SQLModel, create_engine, Relationship
 from pydantic import AfterValidator, Base64Str, BaseModel, EmailStr, Json, SecretStr
 
+from datetime import datetime
+
 from altcha import Payload as AltchaPayload, verify_solution
 
 from urllib.parse import urlparse, ParseResult
@@ -46,6 +48,7 @@ class User(SQLModel, table=True):
 class Report(SQLModel, table=True):
     path_id: int | None = Field(default=None, primary_key=True, foreign_key="path.id")
     user_id: int | None = Field(default=None, primary_key=True, foreign_key="user.id")
+    timestamp: datetime | None = Field(default=datetime.now())
 
 ################################################
 #           API Models
