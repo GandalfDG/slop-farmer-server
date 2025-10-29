@@ -38,7 +38,9 @@ def insert_slop(urls: list[ParseResult], engine: Engine, user: User | None = Non
                 for path in paths:
                     new_path = Path(path=path)
                     if user:
-                        new_path.reports = list().append(Report(path=new_path, user=user, timestamp=datetime.now()))
+                        reports = list()
+                        reports.append(Report(path=new_path, user=user, timestamp=datetime.now()))
+                        new_path.reports = reports
                     new_paths.append(new_path)
                 new_domain.paths = new_paths
                 session.add(new_domain)
@@ -50,7 +52,9 @@ def insert_slop(urls: list[ParseResult], engine: Engine, user: User | None = Non
                     if not path in existing_paths:
                         new_path = Path(path=path)
                         if user:
-                            new_path.reports = list().append(Report(path=new_path, user=user, timestamp=datetime.now()))
+                            report_list = list()
+                            report_list.append(Report(path=new_path, user=user, timestamp=datetime.now()))
+                            new_path.reports = report_list
                         existing_domain.paths.append(new_path)
                         session.add(new_path)
 
@@ -58,7 +62,12 @@ def insert_slop(urls: list[ParseResult], engine: Engine, user: User | None = Non
                         # domain and path exist, append to the path's reports
                         if user:
                             existing_path = existing_paths.get(path)
-                            existing_path.reports.append(Report(path=new_path, user=user, timestamp=datetime.now()))
+                            report_dict = {(report.user.id, report.path.id): report for report in existing_path.reports}
+                            existing_report = report_dict.get((user.id, existing_path.id))
+                            if existing_report:
+                                existing_report.timestamp = datetime.now()
+                            else:
+                                existing_path.reports.append(Report(path=existing_path, user=user, timestamp=datetime.now()))
 
         session.commit()
 
