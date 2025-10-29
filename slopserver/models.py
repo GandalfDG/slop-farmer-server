@@ -37,6 +37,7 @@ class Path(SQLModel, table=True):
     
     domain_id: int | None = Field(foreign_key="domain.id")
     domain: Domain = Relationship(back_populates="paths")
+    reports: list["Report"] = Relationship(back_populates="path")
 
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -45,10 +46,15 @@ class User(SQLModel, table=True):
 
     email_verified: bool = Field(default=False)
 
+    reports: list["Report"] = Relationship(back_populates="user")
+
 class Report(SQLModel, table=True):
     path_id: int | None = Field(default=None, primary_key=True, foreign_key="path.id")
     user_id: int | None = Field(default=None, primary_key=True, foreign_key="user.id")
     timestamp: datetime | None = Field(default=datetime.now())
+
+    path: Path = Relationship(back_populates="reports")
+    user: User = Relationship(back_populates="reports")
 
 ################################################
 #           API Models
