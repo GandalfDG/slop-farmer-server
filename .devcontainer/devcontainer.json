@@ -22,7 +22,7 @@
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "pip3 install --user -r requirements.txt",
-	"postCreateCommand": ". ./env/bin/activate; python -m pip install -r requirements.txt"
+	"postCreateCommand": "python -m venv env && . ./env/bin/activate && python -m pip install -r requirements.txt"
 
 	// Configure tool-specific properties.
 	// "customizations": {},

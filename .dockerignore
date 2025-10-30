@@ -1,0 +1,7 @@
+.devcontainer/
+.vscode/
+
+test_db.sqlite
+env/
+**/__pycache__/
+slopserver/alembic/
