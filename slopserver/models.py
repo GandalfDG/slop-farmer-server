@@ -73,8 +73,7 @@ def url_validator(urls: list[str]) -> list[ParseResult]:
     return parsed_urls
 
 def altcha_validator(altcha_response: AltchaPayload):
-    # verified = verify_solution(altcha_response, TEMP_HMAC_KEY)
-    verified = (True, None)
+    verified = verify_solution(altcha_response, TEMP_HMAC_KEY)
     if not verified[0]:
         raise ValueError(f"altcha verification failed: {verified[1]}")
     return None

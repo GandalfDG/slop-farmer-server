@@ -134,7 +134,7 @@ async def signup_form(form_data: Annotated[SignupForm, Form()]):
         raise HTTPException(status_code=409, detail="User already exists")
 
     # create user
-    create_user(form_data.email, get_password_hash(form_data.password), DB_ENGINE)
+    create_user(form_data.email, get_password_hash(form_data.password.get_secret_value()), DB_ENGINE)
 
 @app.get("/altcha-challenge")
 async def altcha_challenge():
@@ -154,24 +154,24 @@ async def simple_login(username: Annotated[str, Form()], password: Annotated[str
     token = generate_auth_token(username)
     return {"access_token": token, "token_type": "bearer"}
 
-@app.post("/altcha-challenge")
-async def altcha_verify(payload: Annotated[Base64Str, AfterValidator(altcha_validator)]):
-    # if verified, return a JWT for anonymous API access
-    expiration = datetime.now() + timedelta(days=30)
-    uuid = uuid4()
-    bearer_token = {
-        "iss": "slopserver",
-        "exp": int(expiration.timestamp()),
-        "aud": "slopserver",
-        "sub": str(uuid),
-        "client_id": str(uuid),
-        "iat": int(datetime.now().timestamp()),
-        "jti": str(uuid)
-    }
+# @app.post("/altcha-challenge")
+# async def altcha_verify(payload: Annotated[Base64Str, AfterValidator(altcha_validator)]):
+#     # if verified, return a JWT for anonymous API access
+#     expiration = datetime.now() + timedelta(days=30)
+#     uuid = uuid4()
+#     bearer_token = {
+#         "iss": "slopserver",
+#         "exp": int(expiration.timestamp()),
+#         "aud": "slopserver",
+#         "sub": str(uuid),
+#         "client_id": str(uuid),
+#         "iat": int(datetime.now().timestamp()),
+#         "jti": str(uuid)
+#     }
 
-    encoded_jwt = jwt.encode(bearer_token, TOKEN_SECRET, ALGO)
+#     encoded_jwt = jwt.encode(bearer_token, TOKEN_SECRET, ALGO)
 
-    return encoded_jwt
+#     return encoded_jwt
     
     
 
