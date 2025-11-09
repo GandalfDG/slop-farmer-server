@@ -8,7 +8,7 @@ from altcha import Payload as AltchaPayload, verify_solution
 
 from urllib.parse import urlparse, ParseResult
 
-from slopserver.common import TEMP_HMAC_KEY
+from slopserver.server import settings
 
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
@@ -73,7 +73,7 @@ def url_validator(urls: list[str]) -> list[ParseResult]:
     return parsed_urls
 
 def altcha_validator(altcha_response: AltchaPayload):
-    verified = verify_solution(altcha_response, TEMP_HMAC_KEY)
+    verified = verify_solution(altcha_response, settings.altcha_secret)
     if not verified[0]:
         raise ValueError(f"altcha verification failed: {verified[1]}")
     return None

@@ -33,7 +33,6 @@ from uuid import uuid4
 from slopserver.models import Domain, Path, User
 from slopserver.models import SlopReport, SignupForm, altcha_validator
 from slopserver.db import select_slop, insert_slop, get_user, create_user
-from slopserver.common import TEMP_HMAC_KEY
 
 app = FastAPI()
 
@@ -42,7 +41,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 class ServerSettings(BaseSettings):
     db_url: str = "sqlite+pysqlite:///test_db.sqlite"
     token_secret: str = "5bcc778a96b090c3ac1d587bb694a060eaf7bdb5832365f91d5078faf1fff210"
-    # altcha_secret: str
+    altcha_secret: str = "0460de065912d0292df1e7422a5ed2dc362ed56d6bab64fe50b89957463061f3"
 
 settings = ServerSettings()
 
@@ -141,7 +140,7 @@ async def altcha_challenge():
     options = ChallengeOptions(
         expires=datetime.now() + timedelta(minutes=10),
         max_number=80000,
-        hmac_key=TEMP_HMAC_KEY
+        hmac_key=settings.altcha_secret
     )
     challenge = create_challenge(options)
     return challenge
@@ -153,27 +152,6 @@ async def simple_login(username: Annotated[str, Form()], password: Annotated[str
         raise HTTPException(status_code=401, detail="Incorrect username or password")
     token = generate_auth_token(username)
     return {"access_token": token, "token_type": "bearer"}
-
-# @app.post("/altcha-challenge")
-# async def altcha_verify(payload: Annotated[Base64Str, AfterValidator(altcha_validator)]):
-#     # if verified, return a JWT for anonymous API access
-#     expiration = datetime.now() + timedelta(days=30)
-#     uuid = uuid4()
-#     bearer_token = {
-#         "iss": "slopserver",
-#         "exp": int(expiration.timestamp()),
-#         "aud": "slopserver",
-#         "sub": str(uuid),
-#         "client_id": str(uuid),
-#         "iat": int(datetime.now().timestamp()),
-#         "jti": str(uuid)
-#     }
-
-#     encoded_jwt = jwt.encode(bearer_token, TOKEN_SECRET, ALGO)
-
-#     return encoded_jwt
     
-    
-
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
