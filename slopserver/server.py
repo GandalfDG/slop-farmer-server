@@ -140,7 +140,7 @@ async def signup_form(form_data: Annotated[SignupForm, Form()]):
 async def altcha_challenge():
     options = ChallengeOptions(
         expires=datetime.now() + timedelta(minutes=10),
-        max_number=100000,
+        max_number=80000,
         hmac_key=TEMP_HMAC_KEY
     )
     challenge = create_challenge(options)
