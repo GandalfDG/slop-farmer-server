@@ -8,7 +8,7 @@ from altcha import Payload as AltchaPayload, verify_solution
 
 from urllib.parse import urlparse, ParseResult
 
-from slopserver.server import settings
+from slopserver.settings import settings
 
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
@@ -85,4 +85,4 @@ class SlopReport(BaseModel):
 class SignupForm(BaseModel):
     email: EmailStr
     password: SecretStr
-    altcha: Annotated[Base64Str, AfterValidator(altcha_validator)]
+    altcha: Annotated[str, AfterValidator(altcha_validator)]
