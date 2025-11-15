@@ -87,6 +87,17 @@ def generate_auth_token(username):
     encoded_jwt = jwt.encode(bearer_token, TOKEN_SECRET, ALGO)   
     return encoded_jwt
 
+def generate_verification_token(username):
+    expiration = datetime.now() + timedelta(days=2)
+    verification_token = {
+        "iss": "slopserver",
+        "exp": int(expiration.timestamp()),
+        "sub": username
+    }
+
+    encoded_jwt = jwt.encode(verification_token, TOKEN_SECRET, ALGO)
+    return encoded_jwt
+
 def get_token_user(decoded_token):
     user = get_user(decoded_token["sub"], DB_ENGINE)
     return user
@@ -127,6 +138,14 @@ def signup_form(form_data: Annotated[SignupForm, Form()]):
 
     # create user
     create_user(form_data.email, get_password_hash(form_data.password.get_secret_value()), DB_ENGINE)
+
+    # send verification email
+    # create a jwt encoding the username and a time limit to be the verification URL
+
+@app.get("/verify")
+def verify_email(token: str):
+    get_user()
+
 
 @app.get("/altcha-challenge")
 def altcha_challenge():

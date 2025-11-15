@@ -7,4 +7,6 @@ class ServerSettings(BaseSettings):
     altcha_secret: str = "0460de065912d0292df1e7422a5ed2dc362ed56d6bab64fe50b89957463061f3"
     resend_token: str = "re_NXpjzbqR_KgAbu72PKjYHcquX24WvnN3i"
 
+    sender_email: str = "slopfarmer@jack-case.pro"
+
 settings = ServerSettings()
