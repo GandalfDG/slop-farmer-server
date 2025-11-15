@@ -191,6 +191,8 @@ def simple_login(username: Annotated[str, Form()], password: Annotated[str, Form
     user = auth_user(username, password, DB_ENGINE)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
+    if not user.email_verified:
+        raise HTTPException(status_code=401, detail="Unverified email address")
     token = generate_auth_token(username)
     return {"access_token": token, "token_type": "bearer"}
     
