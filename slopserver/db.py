@@ -71,7 +71,7 @@ def insert_slop(urls: list[ParseResult], engine: Engine, user: User | None = Non
 
         session.commit()
 
-def get_user(email, engine):
+def get_user(email, engine) -> User:
     query = select(User).where(User.email == email)
 
     with Session(engine) as session:
@@ -83,4 +83,10 @@ def create_user(email, password_hash, engine):
 
     with Session(engine) as session:
         session.add(user)
+        session.commit()
+
+def verify_user_email(user: User, engine):
+    with Session(engine) as session:
+        session.add(user)
+        user.email_verified = True
         session.commit()

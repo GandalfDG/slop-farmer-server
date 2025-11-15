@@ -15,6 +15,7 @@ import uvicorn
 from fastapi import Body, Depends, FastAPI, Form, HTTPException, Header
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 
 from pydantic import AfterValidator, Base64Str
 
@@ -32,7 +33,7 @@ from uuid import uuid4
 from slopserver.settings import settings
 from slopserver.models import Domain, Path, User
 from slopserver.models import SlopReport, SignupForm, altcha_validator
-from slopserver.db import select_slop, insert_slop, get_user, create_user
+from slopserver.db import select_slop, insert_slop, get_user, create_user, verify_user_email
 
 app = FastAPI()
 
@@ -109,6 +110,13 @@ def verify_auth_token(token: str):
     except:
         raise HTTPException(status_code=401, detail="invalid access token")
 
+def verify_verification_token(token: str):
+    try:
+        token = jwt.decode(token, TOKEN_SECRET, ALGO)
+        return token
+    except:
+        raise HTTPException(status_code=404, detail="invalid verification URL")
+
 @app.post("/report")
 def report_slop(report: SlopReport, bearer: Annotated[str, AfterValidator(verify_auth_token), Header()]):
     user = get_token_user(bearer)
@@ -141,10 +149,31 @@ def signup_form(form_data: Annotated[SignupForm, Form()]):
 
     # send verification email
     # create a jwt encoding the username and a time limit to be the verification URL
+    token = generate_verification_token(form_data.email)
+    return token
+
+
 
 @app.get("/verify")
-def verify_email(token: str):
-    get_user()
+def verify_email(token: Annotated[str, AfterValidator(verify_verification_token)]):
+    user = get_user(token["sub"], DB_ENGINE)
+    if not user:
+        raise HTTPException(status_code=404, detail="invalid verification URL")
+    if user.email_verified:
+        raise HTTPException(status_code=404, detail="already verified")
+    
+    verify_user_email(user, DB_ENGINE)
+    html = f"""
+    <html>
+        <head>
+        </head>
+        <body>
+            <p>{token["sub"]} verified. You may log in now.</p>
+        </body>
+    </html>
+    """
+
+    return HTMLResponse(content=html, status_code=200)
 
 
 @app.get("/altcha-challenge")
