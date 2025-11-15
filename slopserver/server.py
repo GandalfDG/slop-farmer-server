@@ -99,12 +99,12 @@ def verify_auth_token(token: str):
         raise HTTPException(status_code=401, detail="invalid access token")
 
 @app.post("/report")
-async def report_slop(report: SlopReport, bearer: Annotated[str, AfterValidator(verify_auth_token), Header()]):
+def report_slop(report: SlopReport, bearer: Annotated[str, AfterValidator(verify_auth_token), Header()]):
     user = get_token_user(bearer)
     insert_slop(report.slop_urls, DB_ENGINE, user)
 
 @app.post("/check")
-async def check_slop(check: Annotated[SlopReport, Body()], bearer: Annotated[str, AfterValidator(verify_auth_token), Header()]):
+def check_slop(check: Annotated[SlopReport, Body()], bearer: Annotated[str, AfterValidator(verify_auth_token), Header()]):
     slop_results = select_slop(check.slop_urls, DB_ENGINE)
     return slop_results
 
@@ -112,13 +112,13 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     pass
 
 @app.post("/token")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     user = get_user(form_data.username, DB_ENGINE)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
 @app.post("/signup")
-async def signup_form(form_data: Annotated[SignupForm, Form()]):
+def signup_form(form_data: Annotated[SignupForm, Form()]):
     # if we're here, form is validated including the altcha
     # check for existing user with the given email
     if get_user(form_data.email, DB_ENGINE):
@@ -129,7 +129,7 @@ async def signup_form(form_data: Annotated[SignupForm, Form()]):
     create_user(form_data.email, get_password_hash(form_data.password.get_secret_value()), DB_ENGINE)
 
 @app.get("/altcha-challenge")
-async def altcha_challenge():
+def altcha_challenge():
     options = ChallengeOptions(
         expires=datetime.now() + timedelta(minutes=10),
         max_number=80000,
@@ -139,7 +139,7 @@ async def altcha_challenge():
     return challenge
 
 @app.post("/login")
-async def simple_login(username: Annotated[str, Form()], password: Annotated[str, Form()]):
+def simple_login(username: Annotated[str, Form()], password: Annotated[str, Form()]):
     user = auth_user(username, password, DB_ENGINE)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
