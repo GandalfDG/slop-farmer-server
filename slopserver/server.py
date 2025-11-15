@@ -34,6 +34,7 @@ from slopserver.settings import settings
 from slopserver.models import Domain, Path, User
 from slopserver.models import SlopReport, SignupForm, altcha_validator
 from slopserver.db import select_slop, insert_slop, get_user, create_user, verify_user_email
+from slopserver.email import generate_verification_email, send_email
 
 app = FastAPI()
 
@@ -150,9 +151,10 @@ def signup_form(form_data: Annotated[SignupForm, Form()]):
     # send verification email
     # create a jwt encoding the username and a time limit to be the verification URL
     token = generate_verification_token(form_data.email)
-    return token
-
-
+    
+    email_html = generate_verification_email(settings.api_base + "verify/?token=" + token)
+    status = send_email(form_data.email, "Slop Farmer Email Verification", email_html)
+    return status
 
 @app.get("/verify")
 def verify_email(token: Annotated[str, AfterValidator(verify_verification_token)]):

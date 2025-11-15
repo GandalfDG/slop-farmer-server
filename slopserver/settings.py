@@ -8,5 +8,6 @@ class ServerSettings(BaseSettings):
     resend_token: str = "re_NXpjzbqR_KgAbu72PKjYHcquX24WvnN3i"
 
     sender_email: str = "slopfarmer@jack-case.pro"
+    api_base: str = "api.slopfarmer.jack-case.pro/"
 
 settings = ServerSettings()
