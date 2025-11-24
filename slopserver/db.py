@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from datetime import datetime
 from urllib.parse import ParseResult
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 from slopserver.models import Domain, Path, User, Report
@@ -11,6 +11,10 @@ def select_slop(urls: list[ParseResult], engine: Engine) -> Iterable[Domain]:
     with Session(engine) as session:
         rows = session.scalars(query).all()
         return rows
+
+def top_offenders(limit: int|None = None, engine: Engine) -> Iterable[Domain]:
+    query = select(Domain).join(Path).group_by(Domain.id).order_by(func.count(Path.id).desc())
+    top_offenders 
     
 def insert_slop(urls: list[ParseResult], engine: Engine, user: User | None = None):
     domain_dict: dict[str. set[str]] = dict()
