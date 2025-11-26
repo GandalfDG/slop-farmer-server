@@ -214,4 +214,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
 slopserver/server_config.env
+test_db.sqlite
