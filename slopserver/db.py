@@ -12,9 +12,12 @@ def select_slop(urls: list[ParseResult], engine: Engine) -> Iterable[Domain]:
         rows = session.scalars(query).all()
         return rows
 
-def top_offenders(limit: int|None = None, engine: Engine) -> Iterable[Domain]:
-    query = select(Domain).join(Path).group_by(Domain.id).order_by(func.count(Path.id).desc())
-    top_offenders 
+def top_offenders(engine: Engine, limit: int|None = None) -> Iterable[Domain]:
+    query = select(Domain.domain_name, func.count(Path.id)).join(Path).group_by(Domain.id).order_by(func.count(Path.id).desc())
+    if limit: query = query.limit(limit)
+    with Session(engine) as session:
+        top_offenders = session.execute(query).all()
+        return top_offenders
     
 def insert_slop(urls: list[ParseResult], engine: Engine, user: User | None = None):
     domain_dict: dict[str. set[str]] = dict()

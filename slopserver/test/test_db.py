@@ -7,9 +7,12 @@ import unittest
 class TestDBFuncs(unittest.TestCase):
 
     test_db_url = settings.db_url
-    engine = None
 
     def setUp(self):
-        engine = create_engine(self.test_db_url)
+        self.engine = create_engine(self.test_db_url)
 
-    
+    def test_get_top_offenders(self):
+        items = top_offenders(self.engine)
+        print(items)
+        self.assertEqual(items[0][0], "moogle.com")
+
